@@ -1,32 +1,18 @@
-resource "aws_sqs_queue" "queue" {
-    name  = "cd-dev-issue-package-builder-queue"
-    tags = {
-        Environment = "dev"
-    }
+provider "aws" {
+  region = var.region
 }
 
-resource "aws_sqs_queue" "queue" {
-    name  = "cd-uat-issue-package-builder-queue"
-    tags = {
-        Environment = "uat"
-    }
+# Create SQS queues and associated dead letter queues
+module "sqs_queues" {
+  source = "./modules/sqs_queues"
+  
+  # sqs_queue_names = var.sqs_queue_names
+  # dlq_names = var.dlq_names
+  
+  # tags = var.tags
 }
 
-resource "aws_sqs_queue" "queue" {
-    name  = "cd-live-issue-package-builder-queue"  
-
-    tags = {
-        Environment = "live"
-    } 
-}
-
-resource "aws_sqs_queue" "terraform_queue_deadletter" {
-    name = "cd-dev-issue-package-builder-dlq"
-}
-
-resource "aws_sqs_queue" "terraform_queue_deadletter" {
-    name = "cd-uat-issue-package-builder-dlq"
-}
-resource "aws_sqs_queue" "terraform_queue_deadletter" {
-    name = "cd-live-issue-package-builder-dlq"
+# Output the ARNs of the created queues
+ output "sqs_queue_arns" {
+  value = module.sqs_queues.sqs_queue_arns
 }
