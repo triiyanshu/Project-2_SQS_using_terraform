@@ -5,7 +5,7 @@ variable "region" {
 variable "tags" {
   description = "Tags to apply to the SQS queues and DLQs."
   type        = map(string)
-  default     = {
+  default = {
     Project     = "cd"
     Environment = "dev"
   }
