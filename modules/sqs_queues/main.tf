@@ -10,25 +10,30 @@ locals {
 
 resource "aws_sqs_queue" "name_prefix" {
   for_each = var.sqs_queue_names
-  sqs_queue_names = var.sqs_queue_names
-  dlq_names = var.dlq_names
-  
-  # tags = var.tags
+
   name = each.value
-  tags = var.tags
+
+  tags = var.tags[each.key]
+
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.dlq_prefix[each.key].arn
+    maxReceiveCount     = 10
+  })
 }
+
 
 resource "aws_sqs_queue" "dlq_prefix" {
   for_each = var.dlq_names
 
   name = each.value
-  tags = var.tags
+  tags = var.tags[each.key]
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.name_prefix[each.key].arn
     maxReceiveCount = 5
   })
 }
+
 
 output "sqs_queue_arns" {
   value = local.sqs_queues
